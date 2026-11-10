@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aaryn Microphone Test</title>
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px 15px;
+}
+.container {
+  max-width: 550px;
+  margin: auto;
+  background: #202020;
+  padding: 25px;
+  border-radius: 12px;
+}
+h1 { color: #e53935; }
+button {
+  background: #e53935;
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  margin: 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 16px;
+}
+#result {
+  background: #333;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 8px;
+  min-height: 65px;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>AARYN</h1>
+  <h2>Microphone Diagnostic Test</h2>
+
+  <p>Test 1: Check microphone access</p>
+  <button onclick="testMicrophone()">Test Microphone</button>
+
+  <p>Test 2: Check speech recognition</p>
+  <button onclick="testSpeech()">Test Speech Recognition</button>
+
+  <div id="result">Waiting for test...</div>
+</div>
+
+<script>
+function show(message) {
+  document.getElementById("result").innerText = message;
+}
+
+async function testMicrophone() {
+  show("Checking microphone access...");
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true
+    });
+
+    show("SUCCESS: Chrome can access your microphone.");
+
+    stream.getTracks().forEach(track => track.stop());
+
+  } catch (error) {
+    show("MICROPHONE FAILED: " +
+      error.name + " - " + error.message);
+  }
+}
+
+function testSpeech() {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    show("Speech Recognition is NOT supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-GB";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  recognition.onstart = function() {
+    show("Listening... Please speak now.");
+  };
+
+  recognition.onresult = function(event) {
+    const transcript =
+      event.results[0][0].transcript;
+
+    show("SUCCESS! Recognised speech:\n" + transcript);
+  };
+
+  recognition.onerror = function(event) {
+    show("SPEECH ERROR: " + event.error);
+  };
+
+  recognition.onend = function() {
+    console.log("Speech recognition ended.");
+  };
+
+  try {
+    recognition.start();
+  } catch (error) {
+    show("START ERROR: " + error.message);
+  }
+}
+</script>
+</body>
+</html>
